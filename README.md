@@ -1,130 +1,66 @@
 # 🛡️ Cisco ASA NAT & Firewall Lab
 
-> **Enterprise-style network security lab built with Cisco Packet Tracer**
->
-> This project demonstrates the implementation of a segmented network architecture using **Cisco ASA 5506-X**, including **firewall policies, NAT/PAT, static NAT, DMZ segmentation, and access control using ACLs**.
+> **Network Security Lab using Cisco Packet Tracer**
+
+A hands-on network security lab that simulates a small enterprise network using **Cisco ASA 5506-X** as the central firewall.
+
+This project demonstrates practical implementation of:
+
+- Network segmentation
+- Firewall security zones
+- Security levels
+- Access Control Lists (ACL)
+- Static NAT
+- PAT
+- DMZ architecture
+- HTTP and FTP services
+- Connectivity and firewall troubleshooting
 
 ---
 
-## 📌 Project Overview
+## 🎯 Project Overview
 
-This lab simulates a small enterprise network where internal users, public-facing services, and external users are separated into different security zones.
+The network is divided into three main security zones:
 
-The **Cisco ASA 5506-X** acts as the central security gateway between:
+- 🔵 **INSIDE** — trusted internal users
+- 🟢 **DMZ** — servers providing network services
+- 🔴 **OUTSIDE / INTERNET** — simulated external users
 
-- 🔵 **Internal Network** — trusted user devices
-- 🟢 **DMZ** — public-facing servers
-- 🔷 **Outside Network** — simulated Internet / external users
+The **Cisco ASA 5506-X** is positioned between these zones and controls which traffic is allowed to pass.
 
-The main objective is to control **who can access what service**, while allowing legitimate traffic and preventing unauthorized access.
+The main objective of this lab is to demonstrate how a firewall can:
 
----
-
-## 🏗️ Network Architecture
-
-![Network Topology](topology.png)
-
-### Security Zones
-
-| Zone | Purpose | Network |
-|---|---|---|
-| 🔵 INSIDE | Internal users | `192.168.10.0/24` |
-| 🟢 DMZ | Public-facing servers | `192.168.30.0/24` |
-| 🔷 OUTSIDE | External / Internet simulation | `200.100.20.0/24` |
-
-The Cisco ASA sits between these zones and enforces the security policy.
+> **Allow legitimate traffic while restricting unauthorized access.**
 
 ---
 
-# 🧩 Network Components
+# 🏗️ Network Topology
 
-| Device | Role |
-|---|---|
-| **Cisco ASA 5506-X** | Firewall, NAT/PAT & traffic control |
-| **Router2** | Internal network gateway |
-| **Router7** | DMZ network gateway |
-| **Router5** | Outside / Internet simulation |
-| **PC1 / PC2** | Internal clients |
-| **WEB Server** | HTTP service |
-| **FTP Server** | FTP service |
-| **PC3** | External client |
+![Cisco ASA NAT & Firewall Lab](topology_nat_firewall.png)
 
----
-
-# 🌐 IP Addressing
-
-### Internal Network
-
-| Device | Interface | IP Address |
-|---|---|---|
-| ASA | Inside | `192.168.1.1/30` |
-| Router2 | ASA-facing | `192.168.1.2/30` |
-| PC1 | LAN | `192.168.10.2/24` |
-| PC2 | LAN | `192.168.20.2/24` |
-
-### DMZ Network
-
-| Device | Interface | IP Address |
-|---|---|---|
-| ASA | DMZ | `192.168.2.1/30` |
-| Router7 | ASA-facing | `192.168.2.2/30` |
-| WEB Server | LAN | `192.168.30.2/24` |
-| FTP Server | LAN | `192.168.40.2/24` |
-
-### Outside Network
-
-| Device | Interface | IP Address |
-|---|---|---|
-| ASA | Outside | `200.100.10.1/29` |
-| Router5 | ASA-facing | `200.100.10.2/29` |
-| PC3 | External LAN | `200.100.20.2/24` |
-
----
-
-# 🔥 Firewall Security Policy
-
-The firewall is configured according to the principle of **least privilege**.
-
-Only required services are exposed.
-
-| Source | Destination | Service | Result |
-|---|---|---|---|
-| 🔵 Internal | 🟢 WEB Server | HTTP / TCP 80 | ✅ ALLOW |
-| 🔵 Internal | 🟢 FTP Server | FTP / TCP 21 | ✅ ALLOW |
-| 🔷 Outside | 🟢 WEB Server | HTTP / TCP 80 | ✅ ALLOW |
-| 🔷 Outside | 🟢 FTP Server | FTP / TCP 21 | ❌ DENY |
-
-### Security Concept
-
-The objective is not simply to make everything reachable.
-
-Instead:
-
-> **Allow legitimate business traffic while restricting unnecessary access.**
-
-This simulates how a firewall can protect internal resources while still exposing selected services to external users.
-
----
-
-# 🔄 NAT Implementation
-
-## 1. PAT — Internal Users
-
-Internal clients use **PAT (Port Address Translation)** when accessing the outside network.
+### Network Architecture
 
 ```text
-PC1
-192.168.10.2
-     │
-     ▼
-Router2
-     │
-     ▼
-Cisco ASA
-     │
-     │ PAT
-     ▼
-200.100.10.1
-     │
-     ▼
-Outside Network
+                         🔴 OUTSIDE / INTERNET
+                                  │
+                                 PC3
+                                  │
+                              Router3
+                                  │
+                                  │
+                           ┌──────▼──────┐
+                           │ Cisco ASA   │
+                           │   5506-X    │
+                           │  FIREWALL   │
+                           └──────┬──────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+              🔵 INSIDE                     🟢 DMZ
+                    │                           │
+                 Router1                    Router2
+                    │                           │
+                ┌───┴───┐                 ┌────┴────┐
+                │       │                 │         │
+               PC1     PC2              WEB       FTP
