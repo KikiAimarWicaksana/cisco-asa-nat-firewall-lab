@@ -109,29 +109,33 @@ This demonstrates **service-based traffic filtering** using the ASA firewall.
 
 ---
 
-# 🔄 NAT & PAT
+🔄 NAT & PAT
 
-This lab implements both **PAT for internal users** and **Static NAT for DMZ servers**.
+Static NAT
 
----
+Static NAT is used to make a DMZ server accessible using a public IP
+address.
 
-## 1. PAT — Internal Network
+WEB Server
+192.168.30.2
+      ↓
+Static NAT
+      ↓
+200.100.10.3
 
-Internal clients use PAT when accessing the outside network.
+Users from the OUTSIDE network can access the WEB server through:
 
-```text
-Internal Network
+http://200.100.10.3
+
+PAT
+
+PAT is used by the internal network to access the OUTSIDE network using
+a single public IP address on the ASA.
+
 192.168.10.0/24
-        │
-        ▼
-      Router1
-        │
-        ▼
-    Cisco ASA
-        │
-        │ PAT
-        ▼
-  200.100.10.1
-        │
-        ▼
-     OUTSIDE
+      ↓
+   Cisco ASA
+      ↓ PAT
+200.100.10.1
+      ↓
+   OUTSIDE
