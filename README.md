@@ -24,7 +24,7 @@ The network is divided into three main security zones:
 
 - 🔵 **INSIDE** — trusted internal users
 - 🟢 **DMZ** — servers providing network services
-- 🔴 **OUTSIDE / INTERNET** — simulated external users
+- 🔵 **OUTSIDE / INTERNET** — simulated external users
 
 The **Cisco ASA 5506-X** is positioned between these zones and controls which traffic is allowed to pass.
 
