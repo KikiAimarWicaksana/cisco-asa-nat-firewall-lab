@@ -1,141 +1,56 @@
 # 🛡️ Cisco ASA NAT & Firewall Lab
-
-<p align="center">
-  <b>Network Security • Firewall • NAT/PAT • ACL • DMZ</b>
-</p>
-
-<p align="center">
-  A hands-on enterprise network security lab built with Cisco Packet Tracer.
-</p>
+An enterprise network security lab simulating zone segmentation, traffic filtering, and address translation using **Cisco ASA 5506-X** in Cisco Packet Tracer.
 
 ---
 
-## 📌 About This Project
-
-This project simulates a small enterprise network using **Cisco ASA 5506-X** as the central firewall.
-
-The network is segmented into three security zones:
-
-- 🔵 **INSIDE** — Trusted internal users
-- 🟢 **DMZ** — Public-facing servers
-- 🔵 **OUTSIDE** — External / Internet users
-
-The main objective is to implement controlled communication between these zones using **firewall policies, ACLs, NAT/PAT, security levels, and static routing**.
-
-The lab also includes connectivity testing and troubleshooting to verify that the security policies work as intended.
-
----
-
-## 🏗️ Network Topology
+## 📌 Project Overview & Topology
 
 ![Cisco ASA NAT & Firewall Topology](topology_nat_firewall.png)
 
-### Network Zones
-
-| Zone | Purpose | Network |
-|---|---|---|
-| 🔵 **INSIDE** | Internal clients | `192.168.10.0/24`, `192.168.20.0/24` |
-| 🟢 **DMZ** | WEB & FTP servers | `192.168.30.0/24`, `192.168.40.0/24` |
-| 🔵 **OUTSIDE** | External client | `200.100.20.0/24` |
+* **🔵 INSIDE (`Security Level 50`):** Trusted clients (`192.168.10.0/24`, `192.168.20.0/24`)
+* **🟢 DMZ (`Security Level 50`):** Public-facing servers (`192.168.30.0/24`, `192.168.40.0/24`)
+* **🔵 OUTSIDE (`Security Level 0`):** Untrusted external network (`200.100.20.0/24`)
 
 ---
 
-# 🌐 IP Addressing
+## 🌐 IP Addressing Table
 
-### 🔵 INSIDE
-
-| Device | IP Address | Role |
-|---|---|---|
-| ASA Inside | `192.168.1.1/30` | Firewall Interface |
-| Router1 | `192.168.1.2/30` | Internal Router |
-| PC1 | `192.168.10.2/24` | Internal Client |
-| PC2 | `192.168.20.2/24` | Internal Client |
-
-### 🟢 DMZ
-
-| Device | IP Address | Role |
-|---|---|---|
-| ASA DMZ | `192.168.2.1/30` | Firewall Interface |
-| Router2 | `192.168.2.2/30` | DMZ Router |
-| WEB Server | `192.168.30.2/24` | HTTP Server |
-| FTP Server | `192.168.40.2/24` | FTP Server |
-
-### 🔵 OUTSIDE
-
-| Device | IP Address | Role |
-|---|---|---|
-| ASA Outside | `200.100.10.1/29` | Firewall Interface |
-| Router3 | `200.100.10.2/29` | External Router |
-| PC3 | `200.100.20.2/24` | External Client |
+| Zone | Device | Interface / IP | Gateway / Mask | Role |
+| :--- | :--- | :--- | :--- | :--- |
+| **INSIDE** | ASA Inside / Router1 | `192.168.1.1` / `192.168.1.2` | `/30` | Inter-router link |
+| | PC1 / PC2 | `192.168.10.2` / `192.168.20.2` | `/24` (via Router1) | Internal Clients |
+| **DMZ** | ASA DMZ / Router2 | `192.168.2.1` / `192.168.2.2` | `/30` | DMZ gateway link |
+| | WEB / FTP Server | `192.168.30.2` / `192.168.40.2` | `/24` (via Router2) | HTTP / FTP Servers |
+| **OUTSIDE** | ASA Outside / Router3 | `200.100.10.1` / `200.100.10.2` | `/29` | WAN link |
+| | PC3 | `200.100.20.2` | `/24` (via Router3) | External Client |
 
 ---
 
-# 🔥 Firewall Configuration
+## 🔥 Security Policies & Access Control (ACL)
 
-The Cisco ASA is configured as the security boundary between the **INSIDE, DMZ, and OUTSIDE** networks.
+Traffic follows the **least-privilege model**: HTTP is exposed externally, while FTP remains strictly internal.
 
-The firewall uses **security levels and ACLs** to control traffic between these zones.
-
-### Security Levels
-
-| Interface | Security Level | Purpose |
-|---|---:|---|
-| INSIDE | `50` | Trusted internal network |
-| DMZ | `50` | Server network |
-| OUTSIDE | `0` | Untrusted external network |
-
-Security levels establish the trust relationship between ASA interfaces, while ACLs provide more specific control over which services are allowed.
+| Source Zone | Destination | Service / Port | Action | Purpose |
+| :--- | :--- | :---: | :---: | :--- |
+| 🔵 **INSIDE** | 🟢 WEB Server | TCP / `80` | ✅ **ALLOW** | Internal web access |
+| 🔵 **INSIDE** | 🟢 FTP Server | TCP / `21` | ✅ **ALLOW** | Internal file transfer |
+| 🔵 **OUTSIDE** | 🟢 WEB Server | TCP / `80` | ✅ **ALLOW** | Public web hosting |
+| 🔵 **OUTSIDE** | 🟢 FTP Server | TCP / `21` | ❌ **DENY** | Blocked by ASA ACL |
 
 ---
 
-# 📜 Access Control Policy
+## 🔄 NAT & PAT Architecture
 
-The firewall policy follows a **least-privilege approach**.
+* **Static NAT (DMZ Inbound):** Maps DMZ Web Server (`192.168.30.2`) ➔ Public IP `200.100.10.3` (accessible via `http://200.100.10.3`).
+* **PAT / NAT Overload (Outbound):** Overloads LAN subnets (`192.168.10.0/24`) ➔ ASA Outside Interface `200.100.10.1`.
 
-Only required services are permitted.
-
-| Source | Destination | Protocol | Port | Action |
-|---|---|---|---:|---|
-| 🔵 INSIDE | 🟢 WEB Server | TCP | `80` | ✅ ALLOW |
-| 🔵 INSIDE | 🟢 FTP Server | TCP | `21` | ✅ ALLOW |
-| 🔵 OUTSIDE | 🟢 WEB Server | TCP | `80` | ✅ ALLOW |
-| 🔵 OUTSIDE | 🟢 FTP Server | TCP | `21` | ❌ DENY |
-
-### Policy Objective
-
-The WEB service is exposed to external users, while FTP access is restricted to internal users.
-
-This demonstrates **service-based traffic filtering** using the ASA firewall.
+> **Key Rule:** **NAT** handles IP address translation, while **ACL** enforces permit/deny traffic policies.
 
 ---
 
-🔄 NAT & PAT
+## 🧪 Verification & Repository Structure
 
-Static NAT
-
-Static NAT is used to make a DMZ server accessible using a public IP
-address.
-
-WEB Server
-192.168.30.2
-      ↓
-Static NAT
-      ↓
-200.100.10.3
-
-Users from the OUTSIDE network can access the WEB server through:
-
-http://200.100.10.3
-
-PAT
-
-PAT is used by the internal network to access the OUTSIDE network using
-a single public IP address on the ASA.
-
-192.168.10.0/24
-      ↓
-   Cisco ASA
-      ↓ PAT
-200.100.10.1
-      ↓
-   OUTSIDE
+```text
+├── cisco-asa-nat-firewall-lab.pkt   # Packet Tracer lab topology
+├── topology_nat_firewall.png        # Network architecture diagram
+└── README.md                        # Project documentation
