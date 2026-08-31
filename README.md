@@ -7,9 +7,9 @@ An enterprise network security lab simulating zone segmentation, traffic filteri
 
 ![Cisco ASA NAT & Firewall Topology](topology_nat_firewall.png)
 
-* **🔵 INSIDE (`Security Level 50`):** Trusted clients (`192.168.10.0/24`, `192.168.20.0/24`)
-* **🟢 DMZ (`Security Level 50`):** Public-facing servers (`192.168.30.0/24`, `192.168.40.0/24`)
-* **🔵 OUTSIDE (`Security Level 0`):** Untrusted external network (`200.100.20.0/24`)
+* **🔵 INSIDE:** Trusted clients (`192.168.10.0/24`, `192.168.20.0/24`)
+* **🟢 DMZ:** Public-facing servers (`192.168.30.0/24`, `192.168.40.0/24`)
+* **🔵 OUTSIDE:** Untrusted external network (`200.100.20.0/24`)
 
 ---
 
